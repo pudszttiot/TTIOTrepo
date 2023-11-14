@@ -111,11 +111,7 @@ def color_text(text, color):
     """
 
     return (
-        '{}{}{}'.format(
-            _COLOR_ESCAPE.format(_COLORS[color]),
-            text,
-            _COLOR_ESCAPE.format(_COLORS["endc"]),
-        )
+        f'{_COLOR_ESCAPE.format(_COLORS[color])}{text}{_COLOR_ESCAPE.format(_COLORS["endc"])}'
         if _SUPPORTS_COLOR
         else text
     )
@@ -150,12 +146,10 @@ class Generator:
         self._remove_binaries()
 
         if self._generate_addons_file(addons_xml_path):
-            print(
-                "Successfully updated {}".format(color_text(addons_xml_path, 'yellow'))
-            )
+            print(f"Successfully updated {color_text(addons_xml_path, 'yellow')}")
 
             if self._generate_md5_file(addons_xml_path, md5_path):
-                print("Successfully updated {}".format(color_text(md5_path, 'yellow')))
+                print(f"Successfully updated {color_text(md5_path, 'yellow')}")
 
     def _remove_binaries(self):
         """
@@ -168,32 +162,18 @@ class Generator:
                     compiled = os.path.join(parent, fn)
                     try:
                         os.remove(compiled)
-                        print(
-                            "Removed compiled python file: {}".format(
-                                color_text(compiled, 'green')
-                            )
-                        )
+                        print(f"Removed compiled python file: {color_text(compiled, 'green')}")
                     except:
-                        print(
-                            "Failed to remove compiled python file: {}".format(
-                                color_text(compiled, 'red')
-                            )
-                        )
+                        print(f"Failed to remove compiled python file: {color_text(compiled, 'red')}")
             for dir in dirnames:
                 if "pycache" in dir.lower():
                     compiled = os.path.join(parent, dir)
                     try:
                         shutil.rmtree(compiled)
-                        print(
-                            "Removed __pycache__ cache folder: {}".format(
-                                color_text(compiled, 'green')
-                            )
-                        )
+                        print(f"Removed __pycache__ cache folder: {color_text(compiled, 'green')}")
                     except:
                         print(
-                            "Failed to remove __pycache__ cache folder:  {}".format(
-                                color_text(compiled, 'red')
-                            )
+                            f"Failed to remove __pycache__ cache folder:  {color_text(compiled, 'red')}"
                         )
 
     def _create_zip(self, folder, addon_id, version):
@@ -235,11 +215,7 @@ class Generator:
             zip.close()
             size = convert_bytes(os.path.getsize(final_zip))
             print(
-                "Zip created for {} ({}) - {}".format(
-                    color_text(addon_id, 'cyan'),
-                    color_text(version, 'green'),
-                    color_text(size, 'yellow'),
-                )
+                f"Zip created for {color_text(addon_id, 'cyan')} ({color_text(version, 'green')}) - {color_text(size, 'yellow')}"
             )
 
     def _copy_meta_files(self, addon_id, addon_folder):
@@ -253,12 +229,11 @@ class Generator:
         copyfiles = ["addon.xml"]
         for ext in root.findall("extension"):
             if ext.get("point") in ["xbmc.addon.metadata", "kodi.addon.metadata"]:
-                assets = ext.find("assets")
-                if not assets:
-                    continue
-                for art in [a for a in assets if a.text]:
-                    copyfiles.append(os.path.normpath(art.text))
-
+                if assets := ext.find("assets"):
+                    copyfiles.extend(
+                        os.path.normpath(art.text)
+                        for art in [a for a in assets if a.text]
+                    )
         src_folder = os.path.join(self.release_path, addon_id)
         for file in copyfiles:
             addon_path = os.path.join(src_folder, file)
@@ -320,11 +295,7 @@ class Generator:
                     self._create_zip(addon, id, version)
                     self._copy_meta_files(addon, os.path.join(self.zips_path, id))
             except Exception as e:
-                print(
-                    "Excluding {}: {}".format(
-                        color_text(addon, 'yellow'), color_text(e, 'red')
-                    )
-                )
+                print(f"Excluding {color_text(addon, 'yellow')}: {color_text(e, 'red')}")
 
         if changed:
             addons_root[:] = sorted(addons_root, key=lambda addon: addon.get('id'))
@@ -336,9 +307,7 @@ class Generator:
                 return changed
             except Exception as e:
                 print(
-                    "An error occurred updating {}!\n{}".format(
-                        color_text(addons_xml_path, 'yellow'), color_text(e, 'red')
-                    )
+                    f"An error occurred updating {color_text(addons_xml_path, 'yellow')}!\n{color_text(e, 'red')}"
                 )
 
     def _generate_md5_file(self, addons_xml_path, md5_path):
@@ -353,9 +322,7 @@ class Generator:
             return True
         except Exception as e:
             print(
-                "An error occurred updating {}!\n{}".format(
-                    color_text(md5_path, 'yellow'), color_text(e, 'red')
-                )
+                f"An error occurred updating {color_text(md5_path, 'yellow')}!\n{color_text(e, 'red')}"
             )
 
     def _save_file(self, data, file):
@@ -367,9 +334,7 @@ class Generator:
                 f.write(data)
         except Exception as e:
             print(
-                "An error occurred saving {}!\n{}".format(
-                    color_text(file, 'yellow'), color_text(e, 'red')
-                )
+                f"An error occurred saving {color_text(file, 'yellow')}!\n{color_text(e, 'red')}"
             )
 
 
